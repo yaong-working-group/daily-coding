@@ -36,3 +36,45 @@ const InsersitonSort = (arr) => {
 
 const result = InsersitonSort([5, 4, 3, 2, 1]);
 console.log(result);
+
+/* 목요일
+========== ADVANCED =============
+테스트 케이스를 보면 cb = (item) => item * item 이렇게 나와있고 , 
+insertionSort([-10, -11, 2, 29], cb).should.eql([2, -10, -11, 29]); 
+이런식으로 결괏값이 나온다.
+그러면 item * item값이 큰 기준으로 정렬을 한 거고 , 배열에는 item * item값이 아닌 원본 배열 값으로 정렬이 되어야 하므로 , 
+if 조건에만 함수를 씌워서 비교하고 , 배열에 넣어줄 떄는 원본 배열값으로 넣어준다.
+====================================
+*/
+
+const insertionSort = function (arr, cb) {
+  // 컬백함수가 있는 경우
+  if (cb) {
+    let j;
+    for (let i = 1; i < arr.length; i++) {
+      let mainNum = arr[i];
+      for (j = i - 1; j >= 0; j--) {
+        if (cb(mainNum) < cb(arr[j])) {
+          arr[j + 1] = arr[j];
+        } else break;
+      }
+      arr[j + 1] = mainNum;
+    }
+  }
+  // 컬백함수가 없는 경우
+  // 컬백함수가 있다고 가정을 하면 cb가 없다고 에러가 뜬다.
+  else {
+    let j;
+    for (let i = 1; i < arr.length; i++) {
+      let mainNum = arr[i];
+      for (j = i - 1; j >= 0; j--) {
+        if (mainNum < arr[j]) {
+          arr[j + 1] = arr[j];
+        } else break;
+      }
+      arr[j + 1] = mainNum;
+    }
+  }
+
+  return arr;
+};
