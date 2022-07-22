@@ -1,126 +1,64 @@
-function getMax(arr) {
-  return arr.reduce((max, item) => {
-    if (item > max) return item;
-    return max;
-  }, 0);
-}
+/* 
+========== radixSort =============
 
-function countingSort(arr, radix) {
-  const N = arr.length;
-  const output = Array(N).fill(0);
-  const count = Array(10).fill(0);
+!! 접근법 
+1. 각각 숫자의 자릿수 배열을 만들어준다.
+2. 각 숫자를 돌면서 첫번째 자릿수 부터 숫자 자릿수 배열에 넣어준다.
+3. 그렇게 모아진 숫자 자릴수 배열을 풀어준다.
+4. 위 과정을 자릿수 만큼 반복한다.
 
-  // 현재 자리수를 기준으로 0~9의 개수를 센다.
-  arr.forEach((item) => {
-    const idx = Math.floor(item / radix) % 10;
-    count[idx]++;
-  });
+TEST : PASS
+====================================
+*/
 
-  // count[i]가 i까지의 누적 개수가 되도록 만든다.
-  count.reduce((totalNum, num, idx) => {
-    count[idx] = totalNum + num;
-    return totalNum + num;
-  });
-
-  // 아래 속성이 유지되도록 하기 위해 배열을 거꾸로 순회한다.
-  //  1. 가장 큰 값을 먼저 본다.
-  //  2. 가장 큰 값을 가장 마지막에 놓는다.
-  let i = N - 1;
-  while (i >= 0) {
-    const idx = Math.floor(arr[i] / radix) % 10;
-    // count[idx]: 현재 radix의 idx까지 누적 개수
-    // count[idx]개만큼 있으므로, 인덱스는 count[idx] - 1
-    output[count[idx] - 1] = arr[i];
-    count[idx] -= 1;
-    i--;
-  }
-
-  return output;
-}
-
-// naive solution
-// 양의 정수만 정렬 가능
-// function radixSort(arr) {
-//   const max = getMax(arr);
-//   let radix = 1;
-//   while (parseInt(max / radix) > 0) {
-//     arr = countingSort(arr, radix);
-//     radix *= 10;
-//   }
-//   return arr;
-// }
-
-// 음의 정수를 포함한 기수 정렬
-// 1. 주어진 배열을 음수 부분과 양수 부분으로 나눈다.
-// 2. 음수는 절대값을 기준으로, 즉 양수로 변환하여 기수 정렬한다.
-// 3. 양수를 정렬한다.
-// 4. 정렬된 음수 부분을 다시 음수로 바꾸고 순서를 뒤짚는다.
-// 5. 음수 부분과 양수 부분을 붙인다.
 function radixSort(arr) {
-  let left = [];
-  let right = [];
-  arr.forEach((item) => {
-    if (item >= 0) right.push(item);
-    else left.push(item * -1);
-  });
-
-  let max = getMax(left);
-  let radix = 1;
-  while (parseInt(max / radix) > 0) {
-    left = countingSort(left, radix);
-    radix *= 10;
+  // 각각 자릿수 배열을 만들어서 객체 안으로 관리할 수 있도록 객체안에 배열을 만들어 줍니다.
+  let bukets = {};
+  const buket = Array.from({ length: 10 }, (_, i) => [i]);
+  for (let el of buket) {
+    bukets[el] = [];
   }
 
-  max = getMax(right);
-  radix = 1;
-  while (parseInt(max / radix) > 0) {
-    right = countingSort(right, radix);
-    radix *= 10;
-  }
+  // 각각 숫자의 최대 길이를 구해서 그 자릿수 만큼 반복할 수 있도록 합니다.
+  let lenArr = arr.map((v) => (v + '').length);
+  let maxLen = Math.max(...lenArr);
 
-  return left
-    .reverse()
-    .map((item) => item * -1)
-    .concat(right);
+  // 배열의 각자릿수 를 비교하기위한 인덱스 입니다. [lenght - idx]
+  let idx = 1;
+
+  for (let digit = 0; digit < maxLen; digit++) {
+    let temp = [];
+    /* 
+    각각 자릿수 만큼 반복문을 도는데 이 때 각 자릿수를 문자열로 바꿔서 비교를 하고 ,
+    배열안에 넣어줄떄는 원본 배열 숫자를 넣어줍니다.
+    */
+    for (let i = 0; i < arr.length; i++) {
+      // 각 숫자를 문자열로 바꿔줍니다 !
+      let strN = arr[i] + '';
+      // 숫자의 첫쨰 자릿수 부터 비교하기 위해서 배열 길이 - 1 부터 비교해줍니다 !
+      // 음수일때는 배열 왼쪽부터 채워질 수 있도록 unshift를 해줬습니다.
+      if (strN[strN.length - `${idx}`] === '-') bukets['0'].unshift(arr[i]);
+      else if (strN[strN.length - `${idx}`] === undefined)
+        bukets['0'].push(arr[i]);
+      // 음수나 undefined가 아닐때는 각 자릿수에 맞는 배열에 들어가도록 하게 해줍니다.
+      else bukets[strN[strN.length - `${idx}`]].push(arr[i]);
+    }
+    idx++;
+
+    // 정렬된 버켓을 다시 풀어줍니다. (digit번 반복)
+    for (let key in bukets) {
+      temp.push(...bukets[key]);
+    }
+    // 원본 배열을 정렬된 배열로 다시 바꿔줍니다.
+    arr = temp.slice();
+
+    //  bukets를 다시 초기화 시켜 줍니다.
+    for (let el of buket) {
+      bukets[el] = [];
+    }
+  }
+  return arr;
 }
 
-let output = radixSort([1, 2, 43, 100, 21]);
-console.log(output); // --> [1, 3, 21]
-
-// function radixSort(arr) {
-//   // todo: 여기에 코드를 작성합니다.
-//   let bukets = {};
-//   const buket = Array.from({ length: 10 }, (_, i) => [i]);
-//   for (let el of buket) {
-//     bukets[el] = [];
-//   }
-
-//   let lenArr = arr.map((v) => (v + '').length);
-//   let maxLen = Math.max(...lenArr);
-//   let result = [];
-//   for (let i = 1; i <= maxLen; i++) {
-//     console.log(`====${i} PASS ===`);
-//     for (let j = 0; j < arr.length; j++) {
-//       let strN = arr[j] + '';
-//       if (strN[strN.length - i] === undefined) {
-//         strN = 0 + strN;
-//         // console.log(0 + strN);
-//       }
-//       if (strN[strN.length - i] !== undefined) {
-//         bukets[strN[strN.length - i]].push(arr[j]);
-//       }
-//     }
-
-//     for (let key in bukets) {
-//       // console.log(bukets[key]);
-//       result.push(...bukets[key]);
-//     }
-
-//     arr = result.slice();
-//     for (let el of buket) {
-//       bukets[el] = [];
-//     }
-//     result = [];
-//   }
-//   return arr;
-// }
+let result = radixSort([15, 27, 64, -25, 50, 17, 39, 28]);
+console.log(result);
