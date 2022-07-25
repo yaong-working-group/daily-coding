@@ -6,6 +6,7 @@
 // 뭔가 생각처럼 잘 안댐 접근법이 틀린건가 ... ?
 
 TEST : 3개 통과 
+TEST : -> 코드 수정 후 PASS 
 ====================================
 */
 
@@ -14,9 +15,9 @@ const robotPath = function (room, src, dst) {
   const answer = makeAnswerArr(room);
   const [x, y] = src;
   answer[x][y] = 1;
-  const [dx, dy] = dst;
-  const result = helper(room, src, dst, answer);
-  return result[dx][dy] - 1;
+  const check = [];
+  check.push([x, y]);
+  return helper(room, src, dst, answer, check) - 1;
 };
 
 function makeAnswerArr(room) {
@@ -31,67 +32,63 @@ function makeAnswerArr(room) {
   return answer;
 }
 
-function helper(room, src, dst, answer) {
-  const [dsX, dsY] = dst;
-  const [x, y] = src;
-  const que = [];
-  console.log('as', answer);
-  console.log(x, y);
-  if (x === dsX && y === dsY) return answer;
-  // 상
-  if (room[x - 1] !== undefined && room[x - 1][y] !== undefined) {
-    if (answer[x - 1][y] === 0 && room[x - 1][y] === 0) {
-      answer[x - 1][y] = answer[x][y] + 1;
-      que.push([x - 1, y]);
-    }
-  }
-  // 하
-  if (room[x + 1] !== undefined && room[x + 1][y] !== undefined) {
-    if (answer[x + 1][y] === 0 && room[x + 1][y] === 0) {
-      answer[x + 1][y] = answer[x][y] + 1;
-      que.push([x + 1, y]);
-    }
+function helper(room, src, dst, answer, check) {
+  if (check.length === 0) return;
+
+  const poped = check.shift();
+  const [x, y] = poped;
+  const [dx, dy] = dst;
+  // 좌표에 도달한 경우
+  if (x === dx && y == dy) return answer[x][y];
+
+  // 좌
+  if (room[x][y - 1] === 0 && answer[x][y - 1] === 0) {
+    answer[x][y - 1] = answer[x][y] + 1;
+    check.push([x, y - 1]);
   }
   // 우
-  if (answer[x][y + 1] === 0 && room[x][y + 1] === 0) {
+  if (room[x][y + 1] === 0 && answer[x][y + 1] === 0) {
     answer[x][y + 1] = answer[x][y] + 1;
-    que.push([x, y + 1]);
+    check.push([x, y + 1]);
   }
-  // 좌
-  if (answer[x][y - 1] === 0 && room[x][y - 1] === 0) {
-    answer[x][y - 1] = answer[x][y] + 1;
-    que.push([x, y - 1]);
+  // 상
+  if (
+    room[x - 1] !== undefined &&
+    room[x - 1][y] === 0 &&
+    answer[x - 1][y] === 0
+  ) {
+    answer[x - 1][y] = answer[x][y] + 1;
+    check.push([x - 1, y]);
   }
-  for (let i = 0; i < que.length; i++) {
-    return helper(room, que[i], dst, answer);
+  // 하
+  if (
+    room[x + 1] !== undefined &&
+    room[x + 1][y] === 0 &&
+    answer[x + 1][y] === 0
+  ) {
+    answer[x + 1][y] = answer[x][y] + 1;
+    check.push([x + 1, y]);
   }
+
+  return helper(room, src, dst, answer, check);
 }
 
-let room = [
-  [0, 0, 0, 0, 0, 0, 0],
-  [1, 1, 1, 1, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0],
-  [1, 0, 1, 1, 1, 0, 1],
-  [0, 0, 1, 0, 0, 0, 1],
-  [0, 0, 1, 0, 1, 1, 1],
-  [0, 0, 1, 0, 1, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0],
-  ,
+const room = [
+  [0, 0, 0, 0, 0, 0],
+  [0, 1, 1, 0, 1, 0],
+  [0, 1, 0, 0, 0, 0],
+  [0, 0, 1, 1, 1, 0],
+  [1, 0, 0, 0, 0, 0],
 ];
-const src = [0, 3];
-const dst = [7, 3];
+
+[
+  [8, 9, 0, 0, 0, 9],
+  [7, 1, 1, 0, 1, 8],
+  [6, 1, 0, 9, 8, 7],
+  [5, 4, 1, 1, 1, 6],
+  [1, 3, 2, 3, 4, 5],
+];
+const src = [4, 2];
+const dst = [2, 2];
 let output = robotPath(room, src, dst);
 console.log(output); // --> 8
-
-// result
-[
-  [0, 0, 2, 1, 2, 3, 0],
-  [0, 0, 0, 0, 3, 4, 0],
-  [0, 0, 0, 5, 4, 5, 6],
-  [0, 0, 0, 0, 0, 6, 0],
-  [0, 0, 0, 9, 8, 7, 0],
-  [0, 0, 0, 10, 0, 0, 0],
-  [0, 0, 0, 11, 0, 0, 0],
-  [0, 0, 0, 12, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0],
-];
