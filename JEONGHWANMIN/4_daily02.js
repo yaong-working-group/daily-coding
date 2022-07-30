@@ -38,6 +38,7 @@ function helper(room, src, dst, answer, check) {
   const poped = check.shift();
   const [x, y] = poped;
   const [dx, dy] = dst;
+
   // 좌표에 도달한 경우
   if (x === dx && y == dy) return answer[x][y];
 
@@ -82,12 +83,13 @@ const room = [
 ];
 
 [
-  [8, 9, 0, 0, 0, 9],
-  [7, 1, 1, 0, 1, 8],
-  [6, 1, 0, 9, 8, 7],
-  [5, 4, 1, 1, 1, 6],
-  [1, 3, 2, 3, 4, 5],
+  [7, 8, 9, 0, 0, 8],
+  [6, 0, 0, 0, 0, 7],
+  [5, 0, 9, 8, 7, 6],
+  [4, 3, 0, 0, 0, 5],
+  [0, 2, 1, 2, 3, 4],
 ];
+
 const src = [4, 2];
 const dst = [2, 2];
 let output = robotPath(room, src, dst);
