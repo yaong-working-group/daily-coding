@@ -42,7 +42,7 @@ function sortPositiveArr(arr) {
       // arr[i] === 234 일 때
       // 1의 자리 수 구하기 (234 / 1) % 10 === 4 (소수점은 버리기)
       // 10의 자리 수 구하기 (234 / 10) % 10 === 3 (소수점은 버리기)
-      // 1의 자리 수 구하기 (234 / 100) % 10 === 2 (소수점은 버리기)
+      // 100의 자리 수 구하기 (234 / 100) % 10 === 2 (소수점은 버리기)
       const index = Math.floor((radixArr[i] / Math.pow(10, j)) % 10);
       newBucket[index].push(radixArr[i]);
     }
